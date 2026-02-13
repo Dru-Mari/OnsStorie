@@ -84,7 +84,13 @@ Ek kies jou, Erazmataz.`;
       return;
     }
 
-    const normalizedAll = raw.replace(/\s+/g, " ").trim();
+    // Remove SQL comments so checks can't be bypassed
+const noComments = raw
+  .split("\n")
+  .filter(line => !line.trim().startsWith("--"))
+  .join("\n");
+
+const normalizedAll = noComments.replace(/\s+/g, " ").trim();
 
     const protectedMatch = normalizedAll.match(/select \* from (GunstelingMemories|HoekomEkVanJouHou|OnsEntwistle)\b/i);
 
