@@ -1,20 +1,22 @@
 let db;
+let dbReady = false;
 
 initSqlJs({
   locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
 }).then(SQL => {
-
   db = new SQL.Database();
 
   db.run(`
-    CREATE TABLE IF NOT EXISTS GunstelingMemories (
+    DROP TABLE IF EXISTS GunstelingMemories;
+    DROP TABLE IF EXISTS HoekomEkVanJouHou;
+    DROP TABLE IF EXISTS OnsEntwistle;
+
+    CREATE TABLE GunstelingMemories (
       id INTEGER PRIMARY KEY,
       datum TEXT,
       titel TEXT,
       beskrywing TEXT
     );
-
-    DELETE FROM GunstelingMemories;
 
     INSERT INTO GunstelingMemories VALUES
     (1, '2025-11-15', '15 November', 'Net alles omtrent 15 November.'),
@@ -29,12 +31,10 @@ initSqlJs({
     (10, '2026-01-16', 'Krieket mense', 'Toe ons krieket mense geword het 16 Jan.'),
     (11, '2026-01-17', 'Ons Games Day', 'Ons Games Day.');
 
-    CREATE TABLE IF NOT EXISTS HoekomEkVanJouHou (
+    CREATE TABLE HoekomEkVanJouHou (
       id INTEGER PRIMARY KEY,
       rede TEXT
     );
-
-    DELETE FROM HoekomEkVanJouHou;
 
     INSERT INTO HoekomEkVanJouHou (rede) VALUES
     ('Dat jy vir my ’n veilige spasie gee om myself te kan wees en te deel.'),
@@ -48,24 +48,32 @@ initSqlJs({
     ('Dat jy ’n vriend is vir vele. Jou lig skyn so helder vir ander.'),
     ('Ek smelt as ek vir jou kyk.');
 
-    CREATE TABLE IF NOT EXISTS OnsEntwistle (
+    CREATE TABLE OnsEntwistle (
       id INTEGER PRIMARY KEY,
-      storie TEXT
+      storie TEXT,
+      geheim TEXT
     );
 
-    DELETE FROM OnsEntwistle;
-
     INSERT INTO OnsEntwistle VALUES
-    (1, 'Ek weet nie hoe om dit anders te sê nie, maar dit voel asof alles presies moes gebeur soos dit het sodat ons hier kon wees. Ons stories, ons paaie, selfs die timing — dit voel te netjies om net toeval te wees. En elke keer wat iets onsekerheid bring, gebeur daar weer iets klein maar betekenisvol wat ons nader trek. ’n Liedjie wat speel. ’n oomblik wat net té perfek gety is. ’n gevoel van herkenning wanneer ek in jou oë kyk. Jy voel nie vreemd nie. Jy voel bekend. Soos iemand wat ek lankal geken het en net weer moes raakloop.');
+    (1,
+     'Ek weet nie hoe om dit anders te sê nie, maar dit voel asof alles presies moes gebeur soos dit het sodat ons hier kon wees. Ons stories, ons paaie, selfs die timing — dit voel te netjies om net toeval te wees. En elke keer wat iets onsekerheid bring, gebeur daar weer iets klein maar betekenisvol wat ons nader trek. ’n Liedjie wat speel. ’n oomblik wat net té perfek gety is. ’n gevoel van herkenning wanneer ek in jou oë kyk. Jy voel nie vreemd nie. Jy voel bekend. Soos iemand wat ek lankal geken het en net weer moes raakloop.',
+     'F<3K');
   `);
+
+  dbReady = true;
 });
 
 function runSQL() {
-  const sql = document.getElementById("sql").value.trim();
+  const raw = document.getElementById("sql").value;
   const output = document.getElementById("output");
 
+  if (!db || !dbReady) {
+    output.textContent = "Laai… wag net 1 oomblik en druk Run weer 🙂";
+    return;
+  }
+
   try {
-    if (sql === "15112025-2-F<3K") {
+    if (raw.trim() === "15112025-2-F<3K") {
       output.textContent =
 `Ontsluit.
 
@@ -76,25 +84,62 @@ Ek kies jou, Erazmataz.`;
       return;
     }
 
-    const results = db.exec(sql);
+    const normalizedAll = raw.replace(/\s+/g, " ").trim();
 
-    if (!results.length) {
-      output.textContent = "Klaar.";
+    const protectedMatch = normalizedAll.match(/select \* from (GunstelingMemories|HoekomEkVanJouHou|OnsEntwistle)\b/i);
+
+    if (protectedMatch) {
+      const table = protectedMatch[1];
+      const ansMatch = normalizedAll.match(/where answer\s*=\s*'([^']+)'/i);
+
+      if (!ansMatch) {
+        output.textContent =
+`Oeps 😌
+
+Om ’n tabel oop te maak:
+SELECT * FROM <tabel> WHERE answer = '<antwoord>';`;
+        return;
+      }
+
+      const answer = ansMatch[1];
+
+      const ok =
+        (table.toLowerCase() === "gunstelingmemories" && answer === "15112025") ||
+        (table.toLowerCase() === "hoekomekvanjouhou" && answer === "2") ||
+        (table.toLowerCase() === "onsentwistle" && answer === "F<3K");
+
+      if (!ok) {
+        output.textContent = "❌ Nie heeltemal nie… probeer weer 😉";
+        return;
+      }
+
+      const results = db.exec(`SELECT * FROM ${table};`);
+      renderResults(results, output);
       return;
     }
 
-    let text = "";
-    results.forEach(res => {
-      text += res.columns.join(" | ") + "\n";
-      text += "-".repeat(40) + "\n";
-      res.values.forEach(row => {
-        text += row.join(" | ") + "\n";
-      });
-    });
-
-    output.textContent = text;
+    const results = db.exec(raw);
+    renderResults(results, output);
 
   } catch (err) {
     output.textContent = "Fout: " + err.message;
   }
+}
+
+function renderResults(results, output) {
+  if (!results.length) {
+    output.textContent = "Geen resultate.";
+    return;
+  }
+
+  let text = "";
+  results.forEach(res => {
+    text += res.columns.join(" | ") + "\n";
+    text += "-".repeat(40) + "\n";
+    res.values.forEach(row => {
+      text += row.join(" | ") + "\n";
+    });
+  });
+
+  output.textContent = text;
 }
