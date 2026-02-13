@@ -6,47 +6,31 @@
   <title>Ons Storie</title>
   <style>
     body { font-family: system-ui; margin: 40px; max-width: 900px; }
-    textarea { width: 100%; height: 200px; font-family: monospace; }
-    button { padding: 10px 15px; margin-top: 10px; }
-    pre { background: #f4f4f4; padding: 15px; white-space: pre-wrap; }
+    textarea { width: 100%; height: 220px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
+    button { padding: 10px 15px; margin-top: 10px; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 15px; white-space: pre-wrap; border-radius: 12px; }
   </style>
 </head>
 <body>
 
 <h1>Ons Storie</h1>
 <p><em>Katrien se weergawe op Valenteins</em></p>
+
+<!-- FOTO GRID (jy het klaar 3 fotos oor — pas name aan as nodig) -->
 <div style="
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
   margin: 30px 0;
 ">
-
-  <img src="IMG_4577.jpeg" style="
-    width:100%;
-    height:250px;
-    object-fit:cover;
-    border-radius:14px;
-  ">
-
-  <img src="IMG_4533.jpeg" style="
-    width:100%;
-    height:250px;
-    object-fit:cover;
-    border-radius:14px;
-  ">
-
-  <img src="IMG_4416.jpeg" style="
-    width:100%;
-    height:250px;
-    object-fit:cover;
-    border-radius:14px;
-  ">
-
+  <img src="IMG_4577.jpeg" style="width:100%; height:250px; object-fit:cover; border-radius:14px;">
+  <img src="IMG_4533.jpeg" style="width:100%; height:250px; object-fit:cover; border-radius:14px;">
+  <img src="IMG_4416.jpeg" style="width:100%; height:250px; object-fit:cover; border-radius:14px;">
 </div>
 
 <textarea id="sql">
 -- Begin hier:
+-- Klik Run om te sien watter tabelle bestaan.
 SELECT name FROM sqlite_master WHERE type='table';
 </textarea>
 
