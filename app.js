@@ -15,39 +15,17 @@ initSqlJs({
     );
 
     INSERT INTO GunstelingMemories VALUES
-    (1, '2025-11-15', '15 November',
-     'Net alles omtrent 15 November.'),
-
-    (2, '2025-11-23', 'Blaauwklippen',
-     'Toe jy vir my by Blaauwklippen sê jy sal my by die lughawe gaan aflaai. Ek was deurmekaar want jy sou daai week vertrek na die kusdorp en jou antwoord was: “Miskien gaan ek nie meer nie. Miskien het ek nou ’n rede om hier te wil wees.”'),
-
-    (3, '2025-11-29', 'By die karre',
-     '29 November se oomblikke by ons karre nadat jy my by die lughawe opgelaai het, terug in jou parkeer area.'),
-
-    (4, '2025-12-03', 'Created by: F<3K',
-     '3 December se klein detail in jou kode: Created by: F<3K.'),
-
-    (5, '2025-12-05', 'Spek & Bone + Balboa',
-     'Spek & Bone plus Balboa plus post-Balboa se eerste sleepover.'),
-
-    (6, '2025-12-11', 'Oggend koffie & strand',
-     'Oggend koffie en strandstappie. Daar was iets so normaal aan daai oggend. En ook die dag voor ons vakansie amptelik sou begin.'),
-
-    (7, '2025-12-19', 'Imagine Dragons',
-     '19 Desember featuring Imagine Dragons.'),
-
-    (8, '2025-12-20', 'Goldfish & Frozen Margs',
-     'Goldfish plus al ons Frozen Margs in die Kaap. Ek love hoe ons saam kan fun hê.'),
-
-    (9, '2026-01-14', 'Cavella',
-     'Cavella en die gevoel van ’n nuwe canvas voor ons.'),
-
-    (10, '2026-01-16', 'Krieket mense',
-     'Toe ons krieket mense geword het.'),
-
-    (11, '2026-01-17', 'Ons Games Day',
-     'Ons Games Day.');
-    
+    (1, '2025-11-15', '15 November', 'Net alles omtrent 15 November.'),
+    (2, '2025-11-23', 'Blaauwklippen', 'Toe jy vir my by Blaauwklippen sê jy sal my by die lughawe gaan aflaai. “Miskien gaan ek nie meer nie. Miskien het ek nou ’n rede om hier te wil wees.”'),
+    (3, '2025-11-29', 'By die karre', '29 November se oomblikke by ons karre nadat jy my by die lughawe opgelaai het, terug in jou parkeer area.'),
+    (4, '2025-12-03', 'Created by: F<3K', '3 December se klein detail in jou kode: Created by: F<3K.'),
+    (5, '2025-12-05', 'Spek & Bone + Balboa', 'Spek & Bone plus Balboa plus post-Balboa se eerste sleepover.'),
+    (6, '2025-12-11', 'Oggend koffie & strand', 'Oggend koffie en strandstappie. Daar was iets so normaal aan daai oggend.'),
+    (7, '2025-12-19', 'Imagine Dragons', '19 Desember featuring Imagine Dragons.'),
+    (8, '2025-12-20', 'Goldfish & Frozen Margs', 'Goldfish plus al ons Frozen Margs in die Kaap.'),
+    (9, '2026-01-14', 'Cavella', 'Cavella en die gevoel van ’n nuwe canvas voor ons.'),
+    (10, '2026-01-16', 'Krieket mense', 'Toe ons krieket mense geword het.'),
+    (11, '2026-01-17', 'Ons Games Day', 'Ons Games Day.');
 
     CREATE TABLE HoekomEkVanJouHou (
       id INTEGER PRIMARY KEY,
@@ -65,16 +43,17 @@ initSqlJs({
     ('Dat jy mense met respek en waardigheid hanteer.'),
     ('Dat jy ’n vriend is vir vele. Jou lig skyn so helder vir ander.'),
     ('Ek smelt as ek vir jou kyk.');
-    
 
     CREATE TABLE OnsEntwistle (
       id INTEGER PRIMARY KEY,
-      storie TEXT
+      storie TEXT,
+      geheim TEXT
     );
 
     INSERT INTO OnsEntwistle VALUES
     (1,
-     'Ek weet nie hoe om dit anders te sê nie, maar dit voel asof alles presies moes gebeur soos dit het sodat ons hier kon wees. Ons stories, ons paaie, selfs die timing — dit voel te netjies om net toeval te wees. En elke keer wat iets onsekerheid bring, gebeur daar weer iets klein maar betekenisvol wat ons nader trek. ’n Liedjie wat speel. ’n Oomblik wat net té perfek gety is. ’n Gevoel van herkenning wanneer ek in jou oë kyk. Jy voel nie vreemd nie. Jy voel bekend. Soos iemand wat ek lankal geken het en net weer moes raakloop.');
+     'Ek weet nie hoe om dit anders te sê nie, maar dit voel asof alles presies moes gebeur soos dit het sodat ons hier kon wees. Jy voel bekend. Soos iemand wat ek lankal geken het en net weer moes raakloop.',
+     'F<3K');
   `);
 });
 
@@ -84,6 +63,7 @@ function runSQL() {
 
   try {
 
+    // FINAL PASSCODE
     if (sql === "15112025-2-F<3K") {
       output.textContent =
 `Ontsluit.
@@ -95,10 +75,32 @@ Ek kies jou, Erazmataz.`;
       return;
     }
 
+    // TABLE UNLOCK LOGIC
+
+    if (sql === "SELECT * FROM GunstelingMemories WHERE answer = '15112025';") {
+      sql = "SELECT * FROM GunstelingMemories;";
+    }
+
+    if (sql === "SELECT * FROM HoekomEkVanJouHou WHERE answer = '2';") {
+      sql = "SELECT * FROM HoekomEkVanJouHou;";
+    }
+
+    if (sql === "SELECT * FROM OnsEntwistle WHERE answer = 'F<3K';") {
+      sql = "SELECT * FROM OnsEntwistle;";
+    }
+
+    // Block raw SELECT *
+    if (/^\s*select\s+\*\s+from\s+(GunstelingMemories|HoekomEkVanJouHou|OnsEntwistle)/i.test(sql)) {
+      output.textContent =
+`Gebruik:
+SELECT * FROM <tabel> WHERE answer = '<antwoord>';`;
+      return;
+    }
+
     const results = db.exec(sql);
 
     if (!results.length) {
-      output.textContent = "Klaar.";
+      output.textContent = "Geen resultate.";
       return;
     }
 
