@@ -30,7 +30,6 @@ initSqlJs({
     (10, '2026-01-16', 'Krieket mense', 'Toe ons krieket mense geword het 16 Jan.'),
     (11, '2026-01-17', 'Ons Games Day', 'Ons Games Day.');
 
-
     CREATE TABLE HoekomEkVanJouHou (
       id INTEGER PRIMARY KEY,
       rede TEXT
@@ -48,7 +47,6 @@ initSqlJs({
     ('Dat jy ’n vriend is vir vele. Jou lig skyn so helder vir ander.'),
     ('Ek smelt as ek vir jou kyk.');
 
-
     CREATE TABLE OnsEntwistle (
       id INTEGER PRIMARY KEY,
       storie TEXT,
@@ -59,11 +57,18 @@ initSqlJs({
     (1,
      'Ek weet nie hoe om dit anders te sê nie, maar dit voel asof alles presies moes gebeur soos dit het sodat ons hier kon wees. Ons stories, ons paaie, selfs die timing — dit voel te netjies om net toeval te wees. En elke keer wat iets onsekerheid bring, gebeur daar weer iets klein maar betekenisvol wat ons nader trek. ’n Liedjie wat speel. ’n oomblik wat net té perfek gety is. ’n gevoel van herkenning wanneer ek in jou oë kyk. Jy voel nie vreemd nie. Jy voel bekend. Soos iemand wat ek lankal geken het en net weer moes raakloop.',
      'F<3K');
+  `);
 });
 
 function runSQL() {
   const raw = document.getElementById("sql").value;
   const output = document.getElementById("output");
+
+  // If user clicks Run before DB loads
+  if (!db) {
+    output.textContent = "Laai… probeer weer oor ’n oomblik 🙂";
+    return;
+  }
 
   try {
     // Final passcode unlock
@@ -78,10 +83,10 @@ Ek kies jou, Erazmataz.`;
       return;
     }
 
-    // Normalize the whole input so comments/spaces can't bypass rules
+    // Normalize input so comments/whitespace don't bypass the rules
     const normalizedAll = raw.replace(/\s+/g, " ").trim();
 
-    // If they try SELECT * FROM one of the protected tables anywhere, enforce answer-unlock
+    // Detect attempts to open protected tables with SELECT *
     const protectedMatch = normalizedAll.match(/select \* from (GunstelingMemories|HoekomEkVanJouHou|OnsEntwistle)\b/i);
 
     if (protectedMatch) {
@@ -111,13 +116,13 @@ SELECT * FROM <tabel> WHERE answer = '<antwoord>';`;
         return;
       }
 
-      // Correct answer: unlock entire table
+      // Correct answer unlocks ENTIRE table
       const results = db.exec(`SELECT * FROM ${table};`);
       renderResults(results, output);
       return;
     }
 
-    // Otherwise, allow normal queries (like listing tables)
+    // Otherwise allow normal queries like listing tables
     const results = db.exec(raw);
     renderResults(results, output);
 
