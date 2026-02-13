@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="af">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ons Storie</title>
+  <style>
+    body { font-family: system-ui; margin: 40px; max-width: 900px; }
+    textarea { width: 100%; height: 200px; font-family: monospace; }
+    button { padding: 10px 15px; margin-top: 10px; }
+    pre { background: #f4f4f4; padding: 15px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+<h1>Ons Storie</h1>
+<p><em>Katrien se weergawe op Valenteins</em></p>
+
+<textarea id="sql">
+-- Begin hier:
+SELECT name FROM sqlite_master WHERE type='table';
+</textarea>
+
+<br>
+<button onclick="runSQL()">Run</button>
+
+<pre id="output">Resultate sal hier verskyn...</pre>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
