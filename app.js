@@ -3,10 +3,13 @@ let db;
 initSqlJs({
   locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
 }).then(SQL => {
-
   db = new SQL.Database();
 
   db.run(`
+    DROP TABLE IF EXISTS GunstelingMemories;
+    DROP TABLE IF EXISTS HoekomEkVanJouHou;
+    DROP TABLE IF EXISTS OnsEntwistle;
+
     CREATE TABLE GunstelingMemories (
       id INTEGER PRIMARY KEY,
       datum TEXT,
@@ -58,12 +61,11 @@ initSqlJs({
 });
 
 function runSQL() {
-  const sql = document.getElementById("sql").value.trim();
+  let sql = document.getElementById("sql").value.trim();
   const output = document.getElementById("output");
 
   try {
-
-    // FINAL PASSCODE
+    // Final passcode unlock
     if (sql === "15112025-2-F<3K") {
       output.textContent =
 `Ontsluit.
@@ -75,24 +77,38 @@ Ek kies jou, Erazmataz.`;
       return;
     }
 
-    // TABLE UNLOCK LOGIC
+    // Normalize spaces a bit (so he doesn’t have to be perfectly exact)
+    const normalized = sql.replace(/\s+/g, " ").trim();
 
-    if (sql === "SELECT * FROM GunstelingMemories WHERE answer = '15112025';") {
-      sql = "SELECT * FROM GunstelingMemories;";
+    // Match: SELECT * FROM <table> WHERE answer = '<value>';
+    // We "unlock" by replacing it with SELECT * FROM <table>;
+    const unlockMatch = normalized.match(
+      /^SELECT \* FROM (GunstelingMemories|HoekomEkVanJouHou|OnsEntwistle) WHERE answer = '([^']+)';?$/i
+    );
+
+    if (unlockMatch) {
+      const table = unlockMatch[1];
+      const answer = unlockMatch[2];
+
+      const ok =
+        (table.toLowerCase() === "gunstelingmemories" && answer === "15112025") ||
+        (table.toLowerCase() === "hoekomekvanjouhou" && answer === "2") ||
+        (table.toLowerCase() === "onsentwistle" && answer === "F<3K");
+
+      if (ok) {
+        sql = `SELECT * FROM ${table};`;
+      } else {
+        output.textContent = "❌ Nie heeltemal nie… probeer weer 😉";
+        return;
+      }
     }
 
-    if (sql === "SELECT * FROM HoekomEkVanJouHou WHERE answer = '2';") {
-      sql = "SELECT * FROM HoekomEkVanJouHou;";
-    }
-
-    if (sql === "SELECT * FROM OnsEntwistle WHERE answer = 'F<3K';") {
-      sql = "SELECT * FROM OnsEntwistle;";
-    }
-
-    // Block raw SELECT *
-    if (/^\s*select\s+\*\s+from\s+(GunstelingMemories|HoekomEkVanJouHou|OnsEntwistle)/i.test(sql)) {
+    // Block any raw SELECT * FROM the 3 tables (unless it came from a successful unlock above)
+    if (/^SELECT \* FROM (GunstelingMemories|HoekomEkVanJouHou|OnsEntwistle);?$/i.test(normalized)) {
       output.textContent =
-`Gebruik:
+`Oeps 😌
+
+Om ’n tabel oop te maak:
 SELECT * FROM <tabel> WHERE answer = '<antwoord>';`;
       return;
     }
@@ -105,7 +121,6 @@ SELECT * FROM <tabel> WHERE answer = '<antwoord>';`;
     }
 
     let text = "";
-
     results.forEach(res => {
       text += res.columns.join(" | ") + "\n";
       text += "-".repeat(40) + "\n";
